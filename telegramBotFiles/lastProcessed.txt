@@ -1,0 +1,1 @@
+"message":{"message_id":134,"from":{"id":472817950,"is_bot":false,"first_name":"Will","username":"Pseudopod","language_code":"en-US"},"chat":{"id":-308608398,"title":"Anime Club","type":"group","all_members_are_administrators":true},"date":1519771200,"text":"/get@AnimeClubQuotesbot","entities":[{"offset":0,"length":23,"type":"bot_command"}]}}]}
