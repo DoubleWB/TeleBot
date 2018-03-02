@@ -1,19 +1,25 @@
 #!/bin/sh
 
+LAST_PROCESS_ID=""
+
 while [ 1 -eq 1 ]
 do
     #Gets only most recent message received. TODO: get all unprocessed messages if handling is too slow and two+ get sent while one is being dealt with.
     FULL_UPDATE=`curl -s "https://api.telegram.org/bot526971927:AAEXn9rvEuTf-klDkOq6M9KGVIyt8TP1rVg/getUpdates"`
     echo "$FULL_UPDATE" > "./telegramBotFiles/output.txt" 
     LAST_UPDATE=`tail -n 1 "./telegramBotFiles/output.txt"`
+    CHAT_ID=`echo "$LAST_UPDATE" | grep -o -P '(?<=chat\":{\"id\":).*(?=})' | cut -d ',' -f1`
+    MESSAGE_ID=`echo "$LAST_UPDATE" | grep -o -P '(?<=\"message_id\":).*(?=,\"from\")'`
+    PROCESS_ID="$CHAT_ID|$MESSAGE_ID"
+
+    #echo "$LAST_PROCESS_ID"
 
     #Only proceed if the most recent message hasn't been dealt with already
-    if [ "$LAST_UPDATE" != "$(cat "./telegramBotFiles/lastProcessed.txt")" ]
+    if [ "$PROCESS_ID" != "$LAST_PROCESS_ID" ]
     then
-
+        curl -s "https://api.telegram.org/bot526971927:AAEXn9rvEuTf-klDkOq6M9KGVIyt8TP1rVg/sendMessage?chat_id=$CHAT_ID&text=I think my last message ($LAST_PROCESS_ID) is different from this one ($PROCESS_ID)"
 	#Trickily only get the text if it is a bot command (only json with the entities field)
     	LAST_TEXT=`echo "$LAST_UPDATE" | grep -o -P '(?<=text\":\").*(?=\",\"entities)'`
-    	CHAT_ID=`echo "$LAST_UPDATE" | grep -o -P '(?<=chat\":{\"id\":).*(?=})' | cut -d ',' -f1`
 
     	#echo "Received command: $LAST_TEXT"
 	#echo "Chat id: $CHAT_ID"
@@ -50,9 +56,7 @@ do
 	    #echo "$randomQuote"
 	    curl -s "https://api.telegram.org/bot526971927:AAEXn9rvEuTf-klDkOq6M9KGVIyt8TP1rVg/sendMessage?chat_id=$CHAT_ID&text=$randomQuote"
     	fi
-
-    	echo "$LAST_UPDATE" > "./telegramBotFiles/lastProcessed.txt"
+    LAST_PROCESS_ID="$PROCESS_ID"
     fi
+
 done
-
-
